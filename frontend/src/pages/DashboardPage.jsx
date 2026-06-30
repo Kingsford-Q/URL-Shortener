@@ -88,12 +88,11 @@ export default function DashboardPage() {
         <Alert>{error}</Alert>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-2.5">
-        <div className="relative w-64">
-          <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <div className="w-64">
           <Input
+            icon={Search}
             placeholder="Search alias or URL"
-            className="pl-9"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -122,7 +121,7 @@ export default function DashboardPage() {
       </div>
 
       {isLoading ? (
-        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-soft">
           {Array.from({ length: 5 }).map((_, i) => (
             <SkeletonRow key={i} />
           ))}

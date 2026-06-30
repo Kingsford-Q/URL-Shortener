@@ -4,9 +4,9 @@ import Button from "./Button";
 import Input from "./Input";
 import Alert from "./Alert";
 import Toggle from "./Toggle";
-import { Lock, EyeOff, Zap, Hourglass } from "./icons";
+import { Lock, EyeOff, Globe, Zap, Hourglass } from "./icons";
 import { apiErrorMessage } from "../api/client";
-import { toIsoOrUndefined, toLocalInputValue } from "../lib/format";
+import { isValidUrl, normalizeUrl, toIsoOrUndefined, toLocalInputValue } from "../lib/format";
 
 const ALIAS_HINT = "3-32 letters, numbers, _ or -";
 
@@ -27,9 +27,17 @@ export default function LinkFormModal({ link, onClose, onSubmit }) {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+
+    const url = normalizeUrl(originalUrl);
+    setOriginalUrl(url);
+    if (!isValidUrl(url)) {
+      setError("Enter a valid URL, for example example.com/page or https://example.com/page.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const payload = { originalUrl };
+      const payload = { originalUrl: url };
 
       if (!isEdit && customAlias.trim()) payload.customAlias = customAlias.trim();
 
@@ -65,11 +73,15 @@ export default function LinkFormModal({ link, onClose, onSubmit }) {
 
         <Input
           label="Destination URL"
-          type="url"
+          icon={Globe}
+          type="text"
+          inputMode="url"
+          autoComplete="url"
           required
           value={originalUrl}
           onChange={(e) => setOriginalUrl(e.target.value)}
-          placeholder="https://example.com/page"
+          onBlur={(e) => setOriginalUrl(normalizeUrl(e.target.value))}
+          placeholder="example.com/page"
         />
 
         {!isEdit && (
@@ -84,7 +96,7 @@ export default function LinkFormModal({ link, onClose, onSubmit }) {
         )}
 
         <div className="divide-y divide-ink-100 rounded-xl border border-ink-100">
-          <div className="p-3.5">
+          <div className="p-4">
             <Toggle
               checked={hasPassword}
               onChange={setHasPassword}
@@ -104,7 +116,7 @@ export default function LinkFormModal({ link, onClose, onSubmit }) {
             )}
           </div>
 
-          <div className="p-3.5">
+          <div className="p-4">
             <Toggle
               checked={hasExpiry}
               onChange={setHasExpiry}
@@ -123,7 +135,7 @@ export default function LinkFormModal({ link, onClose, onSubmit }) {
             )}
           </div>
 
-          <div className="p-3.5">
+          <div className="p-4">
             <Toggle
               checked={oneTimeUse}
               onChange={setOneTimeUse}
@@ -133,7 +145,7 @@ export default function LinkFormModal({ link, onClose, onSubmit }) {
             />
           </div>
 
-          <div className="p-3.5">
+          <div className="p-4">
             <Toggle
               checked={isPrivate}
               onChange={setIsPrivate}

@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { createLink } from "../api/links";
 import { apiErrorMessage } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { isValidUrl, normalizeUrl } from "../lib/format";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Alert from "../components/Alert";
-import { BarChart, Copy, Lock, QrCode, Zap } from "../components/icons";
+import { BarChart, Copy, Globe, Lock, QrCode, Zap } from "../components/icons";
 
 const FEATURES = [
   {
@@ -38,9 +39,17 @@ export default function HomePage() {
     e.preventDefault();
     setError("");
     setResult(null);
+
+    const url = normalizeUrl(originalUrl);
+    setOriginalUrl(url);
+    if (!isValidUrl(url)) {
+      setError("Enter a valid URL, for example example.com/page or https://example.com/page.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const data = await createLink({ originalUrl });
+      const data = await createLink({ originalUrl: url });
       setResult(data);
     } catch (err) {
       setError(apiErrorMessage(err));
@@ -74,17 +83,21 @@ export default function HomePage() {
           </h1>
           <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-500">
             Custom aliases, password protection, expiration, one-time links, QR codes, and real click
-            analytics — paste a URL below and try it without an account.
+            analytics. Paste a URL below and try it without an account.
           </p>
 
           <form onSubmit={onSubmit} className="mt-7 flex max-w-lg flex-col gap-2 sm:flex-row">
             <div className="flex-1">
               <Input
-                placeholder="https://example.com/a-very-long-url"
-                type="url"
+                icon={Globe}
+                placeholder="example.com/a-very-long-url"
+                type="text"
+                inputMode="url"
+                autoComplete="url"
                 required
                 value={originalUrl}
                 onChange={(e) => setOriginalUrl(e.target.value)}
+                onBlur={(e) => setOriginalUrl(normalizeUrl(e.target.value))}
               />
             </div>
             <Button type="submit" loading={loading} className="sm:w-auto">

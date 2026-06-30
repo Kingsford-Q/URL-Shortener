@@ -3,11 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as adminApi from "../api/admin";
 import { apiErrorMessage } from "../api/client";
 import { formatDate } from "../lib/format";
-import Spinner from "../components/Spinner";
 import Alert from "../components/Alert";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
-import { SkeletonRow } from "../components/Skeleton";
+import Skeleton, { SkeletonRow } from "../components/Skeleton";
 import { BarChart, Inbox, Link2, Shield, User } from "../components/icons";
 
 function StatCard({ label, value, icon: StatIcon }) {
@@ -17,7 +16,11 @@ function StatCard({ label, value, icon: StatIcon }) {
         <StatIcon size={13} />
         <span className="text-[11px] font-semibold uppercase tracking-wide">{label}</span>
       </div>
-      <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-ink-950">{value}</div>
+      {value === undefined ? (
+        <Skeleton className="mt-2.5 h-6 w-12" />
+      ) : (
+        <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-ink-950">{value}</div>
+      )}
     </div>
   );
 }
@@ -47,11 +50,11 @@ export default function AdminPage() {
         <p className="mt-1 text-sm text-ink-500">Platform-wide stats and user management</p>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Users" value={statsQuery.data?.userCount ?? "—"} icon={User} />
-        <StatCard label="Links" value={statsQuery.data?.linkCount ?? "—"} icon={Link2} />
-        <StatCard label="Active links" value={statsQuery.data?.activeLinkCount ?? "—"} icon={Shield} />
-        <StatCard label="Total clicks" value={statsQuery.data?.totalClicks ?? "—"} icon={BarChart} />
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard label="Users" value={statsQuery.data?.userCount} icon={User} />
+        <StatCard label="Links" value={statsQuery.data?.linkCount} icon={Link2} />
+        <StatCard label="Active links" value={statsQuery.data?.activeLinkCount} icon={Shield} />
+        <StatCard label="Total clicks" value={statsQuery.data?.totalClicks} icon={BarChart} />
       </div>
 
       <div className="mb-3">
@@ -60,7 +63,7 @@ export default function AdminPage() {
 
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-500">Users</h2>
       {usersQuery.isLoading ? (
-        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-soft">
           {Array.from({ length: 4 }).map((_, i) => (
             <SkeletonRow key={i} />
           ))}

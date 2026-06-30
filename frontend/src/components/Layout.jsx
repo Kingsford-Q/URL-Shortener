@@ -78,7 +78,7 @@ export default function Layout() {
           </nav>
         </div>
       </header>
-      <main id="main-content" className="mx-auto max-w-6xl px-5 py-10">
+      <main id="main-content" className="mx-auto max-w-6xl px-5 py-12">
         <Outlet />
       </main>
     </div>

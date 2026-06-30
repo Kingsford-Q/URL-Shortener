@@ -32,7 +32,11 @@ function StatCard({ label, value, icon: StatIcon }) {
         {StatIcon && <StatIcon size={13} />}
         <span className="text-[11px] font-semibold uppercase tracking-wide">{label}</span>
       </div>
-      <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-ink-950">{value}</div>
+      {value === undefined ? (
+        <Skeleton className="mt-2.5 h-6 w-16" />
+      ) : (
+        <div className="mt-2 font-mono text-xl font-semibold tabular-nums text-ink-950">{value}</div>
+      )}
     </div>
   );
 }
@@ -139,11 +143,11 @@ export default function LinkDetailPage() {
         </RouterLink>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard label="Total clicks" value={analytics?.totalClicks ?? "—"} icon={TrendUp} />
-            <StatCard label="Unique visitors" value={analytics?.uniqueVisitors ?? "—"} icon={User} />
+      <div className="grid gap-7 lg:grid-cols-3">
+        <div className="space-y-7 lg:col-span-2">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard label="Total clicks" value={analytics?.totalClicks} icon={TrendUp} />
+            <StatCard label="Unique visitors" value={analytics?.uniqueVisitors} icon={User} />
             <StatCard label="Created" value={formatDate(link.createdAt)} />
             <StatCard label="Expires" value={link.expiresAt ? formatDate(link.expiresAt) : "Never"} />
           </div>
@@ -175,7 +179,7 @@ export default function LinkDetailPage() {
             )}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             <BreakdownChart title="Browsers" data={analytics?.browsers} />
             <BreakdownChart title="Operating systems" data={analytics?.operatingSystems} />
             <BreakdownChart title="Devices" data={analytics?.devices} />
@@ -220,7 +224,7 @@ export default function LinkDetailPage() {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="rounded-2xl border border-ink-100 bg-white p-5 text-center shadow-soft">
             <h3 className="mb-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-ink-800">
               <QrIcon size={14} />
