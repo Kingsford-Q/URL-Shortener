@@ -21,7 +21,7 @@ app.use(helmet());
 // a phone) at once. The deployed frontend's URL is baked in as part of the
 // default so CORS works even if the env var isn't set on the host -- the
 // env var still wins whenever it's actually present.
-const DEFAULT_ORIGINS = "http://localhost:5173,https://my-url-shortenerr.vercel.app";
+const DEFAULT_ORIGINS = "http://localhost:5173,https://url-shortener-dun-iota.vercel.app";
 const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || DEFAULT_ORIGINS)
   .split(",")
   .map((origin) => origin.trim());

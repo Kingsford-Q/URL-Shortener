@@ -32,9 +32,9 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: FRONTEND_URL
-        value: https://my-url-shortenerr.vercel.app
+        value: https://url-shortener-dun-iota.vercel.app
       - key: CORS_ORIGINS
-        value: https://my-url-shortenerr.vercel.app
+        value: https://url-shortener-dun-iota.vercel.app
       # These two stay blueprint-unmanaged since they're real credentials
       # already set by hand in the Render dashboard -- syncing the blueprint
       # must not overwrite them.
