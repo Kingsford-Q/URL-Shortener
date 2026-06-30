@@ -38,10 +38,7 @@ Recommended split: **frontend on Vercel** (static Vite build), **backend on Rend
 ### Backend (Render)
 
 1. On Render, "New +" -> "Blueprint", point it at this repo. It picks up [`backend/render.yaml`](backend/render.yaml) and creates the service (root directory `backend`, builds + runs migrations + seeds automatically).
-2. After the first deploy, set these env vars in the Render dashboard (the blueprint marks them as required but unset):
-   - `FRONTEND_URL` -- your Vercel URL, e.g. `https://your-app.vercel.app`
-   - `CORS_ORIGINS` -- same value (can be a comma-separated list if you also want a custom domain)
-   - `ADMIN_EMAIL` / `ADMIN_PASSWORD` -- your real admin credentials
+2. When prompted, set `ADMIN_EMAIL` / `ADMIN_PASSWORD` to your real admin credentials. `FRONTEND_URL` and `CORS_ORIGINS` already default to this project's deployed Vercel URL, baked into `render.yaml` and into `app.js`'s CORS fallback -- nothing to fill in for those unless you're deploying your own fork to a different frontend URL, in which case update both places.
 3. Note the service's `.onrender.com` URL -- you'll need it for the frontend.
 
 `BASE_URL` is left unset deliberately: the backend derives it from the request host, so it'll automatically be your Render URL (or a custom domain if you add one later) with no redeploy needed.
@@ -52,7 +49,7 @@ The SQLite database on Render's free tier resets on every redeploy and sleep/wak
 
 1. Import this repo on Vercel and set **Root Directory** to `frontend` (it'll pick up [`frontend/vercel.json`](frontend/vercel.json) from there for the SPA routing rewrite).
 2. Set the env var `VITE_API_URL` to your Render backend's URL, e.g. `https://url-shortener-backend.onrender.com`.
-3. Deploy. Then go back to Render and fill in `FRONTEND_URL`/`CORS_ORIGINS` with this Vercel URL if you haven't already.
+3. Deploy. If you get a different `.vercel.app` URL than the one already baked into the backend's CORS config (e.g. deploying your own fork), update `FRONTEND_URL`/`CORS_ORIGINS` in `backend/render.yaml` and the `DEFAULT_ORIGINS` fallback in `backend/src/app.js` to match, then push -- Render auto-redeploys on push.
 
 ## Features implemented
 

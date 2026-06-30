@@ -31,12 +31,13 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 7d
-      # Fill these in after the Vercel frontend is deployed (or update them
-      # later from the Render dashboard -- no redeploy needed).
       - key: FRONTEND_URL
-        sync: false
+        value: https://my-url-shortenerr.vercel.app
       - key: CORS_ORIGINS
-        sync: false
+        value: https://my-url-shortenerr.vercel.app
+      # These two stay blueprint-unmanaged since they're real credentials
+      # already set by hand in the Render dashboard -- syncing the blueprint
+      # must not overwrite them.
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD

@@ -18,8 +18,11 @@ app.use(helmet());
 // CORS_ORIGINS is a comma-separated allow-list, distinct from FRONTEND_URL
 // (which is the single canonical URL used for redirects). This lets one
 // backend serve both localhost (desktop dev) and a LAN IP (e.g. testing on
-// a phone) at once; defaults to just FRONTEND_URL if not set.
-const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || "http://localhost:5173")
+// a phone) at once. The deployed frontend's URL is baked in as part of the
+// default so CORS works even if the env var isn't set on the host -- the
+// env var still wins whenever it's actually present.
+const DEFAULT_ORIGINS = "http://localhost:5173,https://my-url-shortenerr.vercel.app";
+const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || DEFAULT_ORIGINS)
   .split(",")
   .map((origin) => origin.trim());
 
