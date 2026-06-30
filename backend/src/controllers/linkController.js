@@ -42,7 +42,7 @@ const create = asyncHandler(async (req, res) => {
     throw new ApiError(401, "You must be signed in to create a private link");
   }
   const link = await linkService.createLink(req.user?.id, req.body);
-  res.status(201).json({ link, shortUrl: qrService.shortUrlFor(link.shortCode) });
+  res.status(201).json({ link, shortUrl: qrService.shortUrlFor(link.shortCode, req) });
 });
 
 const list = asyncHandler(async (req, res) => {
@@ -60,7 +60,7 @@ const list = asyncHandler(async (req, res) => {
 
 const getOne = asyncHandler(async (req, res) => {
   const link = await linkService.getLinkForOwner(req.user.id, req.params.id);
-  res.json({ link, shortUrl: qrService.shortUrlFor(link.shortCode) });
+  res.json({ link, shortUrl: qrService.shortUrlFor(link.shortCode, req) });
 });
 
 const update = asyncHandler(async (req, res) => {
@@ -83,10 +83,10 @@ const qr = asyncHandler(async (req, res) => {
   const format = req.query.format === "svg" ? "svg" : "png";
 
   if (format === "svg") {
-    const svg = await qrService.generateSvg(link.shortCode);
+    const svg = await qrService.generateSvg(link.shortCode, req);
     res.type("image/svg+xml").send(svg);
   } else {
-    const png = await qrService.generatePng(link.shortCode);
+    const png = await qrService.generatePng(link.shortCode, req);
     res.type("image/png").send(png);
   }
 });

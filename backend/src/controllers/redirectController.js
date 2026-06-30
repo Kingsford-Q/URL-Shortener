@@ -25,6 +25,15 @@ const qrSchema = z.object({
   query: z.object({ format: z.enum(["png", "svg"]).optional() }),
 });
 
+// Same reasoning as qrService's BASE_URL handling: derive the frontend's
+// host from the request so a phone visiting the backend on a LAN IP gets
+// redirected to the frontend on that same LAN IP, not "localhost" (which on
+// the phone means the phone itself). FRONTEND_URL overrides this when set.
+function deriveFrontendUrl(req) {
+  if (process.env.FRONTEND_URL) return process.env.FRONTEND_URL.replace(/\/+$/, "");
+  return `${req.protocol}://${req.hostname}:5173`;
+}
+
 // GET /:shortCode -- redirects directly for unprotected links, otherwise
 // sends the browser to the frontend's password-entry page.
 const resolve = asyncHandler(async (req, res) => {
@@ -32,13 +41,11 @@ const resolve = asyncHandler(async (req, res) => {
   const state = linkService.evaluateLinkState(link);
 
   if (!state.ok) {
-    const frontend = process.env.FRONTEND_URL || "http://localhost:5173";
-    return res.redirect(`${frontend}/link-status?reason=${state.reason}`);
+    return res.redirect(`${deriveFrontendUrl(req)}/link-status?reason=${state.reason}`);
   }
 
   if (link.passwordHash) {
-    const frontend = process.env.FRONTEND_URL || "http://localhost:5173";
-    return res.redirect(`${frontend}/protected/${link.shortCode}`);
+    return res.redirect(`${deriveFrontendUrl(req)}/protected/${link.shortCode}`);
   }
 
   await analyticsService.recordVisit(req, link);
@@ -68,10 +75,10 @@ const qr = asyncHandler(async (req, res) => {
 
   const format = req.query.format === "svg" ? "svg" : "png";
   if (format === "svg") {
-    const svg = await qrService.generateSvg(link.shortCode);
+    const svg = await qrService.generateSvg(link.shortCode, req);
     res.type("image/svg+xml").send(svg);
   } else {
-    const png = await qrService.generatePng(link.shortCode);
+    const png = await qrService.generatePng(link.shortCode, req);
     res.type("image/png").send(png);
   }
 });

@@ -1,8 +1,7 @@
-import client from "./client";
+import client, { getApiBaseUrl } from "./client";
 
 export function buildShortUrl(shortCode) {
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-  return `${baseURL}/${shortCode}`;
+  return `${getApiBaseUrl()}/${shortCode}`;
 }
 
 export async function createLink(input) {
