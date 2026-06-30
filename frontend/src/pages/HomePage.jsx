@@ -94,7 +94,7 @@ export default function HomePage() {
           className="pointer-events-none absolute -left-32 -top-40 h-96 w-96 rounded-full bg-brand-200/40 blur-3xl"
         />
 
-        <div className="relative animate-fade-up">
+        <div className="relative animate-fade-up p-8">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700">
             <Zap size={12} />
             Links that hold up
