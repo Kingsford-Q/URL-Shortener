@@ -25,11 +25,34 @@ npm run dev              # http://localhost:4000
 ```bash
 cd frontend
 npm install
-cp .env.example .env    # VITE_API_URL should match the backend's BASE_URL
+cp .env.example .env
 npm run dev               # http://localhost:5173
 ```
 
-Both dev servers must be running for the app to work. The backend's `FRONTEND_URL` env var (CORS) and `BASE_URL` env var (used to build short links and QR codes) should match wherever the frontend/backend actually end up running.
+Both dev servers must be running for the app to work. `BASE_URL` (backend) and `VITE_API_URL` (frontend) are both optional in development -- left unset, each derives the right host from the incoming request, so the app works automatically whether you open it via `localhost` or your machine's LAN IP (e.g. testing from a phone). Set them explicitly only to override that, e.g. in production.
+
+## Deployment
+
+Recommended split: **frontend on Vercel** (static Vite build), **backend on Render** (long-running Node process). The backend isn't a good fit for Vercel's serverless functions -- it uses SQLite (needs a real filesystem) and in-memory rate limiting/caching (needs a persistent process), both of which serverless invocations don't provide.
+
+### Backend (Render)
+
+1. On Render, "New +" -> "Blueprint", point it at this repo. It picks up [`backend/render.yaml`](backend/render.yaml) and creates the service (root directory `backend`, builds + runs migrations + seeds automatically).
+2. After the first deploy, set these env vars in the Render dashboard (the blueprint marks them as required but unset):
+   - `FRONTEND_URL` -- your Vercel URL, e.g. `https://your-app.vercel.app`
+   - `CORS_ORIGINS` -- same value (can be a comma-separated list if you also want a custom domain)
+   - `ADMIN_EMAIL` / `ADMIN_PASSWORD` -- your real admin credentials
+3. Note the service's `.onrender.com` URL -- you'll need it for the frontend.
+
+`BASE_URL` is left unset deliberately: the backend derives it from the request host, so it'll automatically be your Render URL (or a custom domain if you add one later) with no redeploy needed.
+
+The SQLite database on Render's free tier resets on every redeploy and sleep/wake cycle (no persistent disk on the free plan) -- fine for demoing, not for data you want to keep. See the comments in `backend/render.yaml` for the upgrade path (persistent disk on a paid plan, or migrate to Postgres).
+
+### Frontend (Vercel)
+
+1. Import this repo on Vercel and set **Root Directory** to `frontend` (it'll pick up [`frontend/vercel.json`](frontend/vercel.json) from there for the SPA routing rewrite).
+2. Set the env var `VITE_API_URL` to your Render backend's URL, e.g. `https://url-shortener-backend.onrender.com`.
+3. Deploy. Then go back to Render and fill in `FRONTEND_URL`/`CORS_ORIGINS` with this Vercel URL if you haven't already.
 
 ## Features implemented
 

@@ -1,0 +1,43 @@
+# Render Blueprint -- import this repo on Render ("New +" -> "Blueprint")
+# and it creates the service below automatically.
+# https://render.com/docs/blueprint-spec
+#
+# Database note: this defaults to SQLite for zero-setup deployment, but
+# Render's free web services have an ephemeral filesystem -- dev.db (and
+# everything in it) is wiped on every redeploy and on every sleep/wake
+# cycle (free instances sleep after 15 min idle). Fine for a quick demo,
+# not for data you actually want to keep. To fix that, either:
+#   (a) upgrade to a paid plan and attach a persistent disk, then point
+#       DATABASE_URL at a file inside it, or
+#   (b) switch to a hosted Postgres (Render Postgres, Supabase, and Neon
+#       all have free tiers) -- also requires changing `provider` in
+#       backend/prisma/schema.prisma from "sqlite" to "postgresql", since
+#       Prisma can't pick the provider from an env var.
+services:
+  - type: web
+    name: url-shortener-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run prisma:generate && npm run prisma:deploy && npm run seed
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # Fill these in after the Vercel frontend is deployed (or update them
+      # later from the Render dashboard -- no redeploy needed).
+      - key: FRONTEND_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
