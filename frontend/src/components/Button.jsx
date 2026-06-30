@@ -6,7 +6,7 @@ const VARIANTS = {
   secondary:
     "bg-white text-ink-700 border border-ink-200 shadow-soft hover:border-ink-300 hover:bg-ink-50 active:scale-[0.98] disabled:text-ink-300",
   danger:
-    "bg-white text-red-600 border border-red-200 hover:bg-red-50 active:scale-[0.98] disabled:text-red-300",
+    "bg-red-600 text-white shadow-soft hover:bg-red-700 active:scale-[0.98] disabled:bg-red-300 disabled:shadow-none",
   ghost: "text-ink-500 hover:bg-ink-100 hover:text-ink-800 active:scale-[0.98] disabled:text-ink-300",
 };
 

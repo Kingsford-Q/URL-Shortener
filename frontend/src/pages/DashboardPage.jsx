@@ -9,6 +9,7 @@ import Alert from "../components/Alert";
 import Spinner from "../components/Spinner";
 import LinkRow from "../components/LinkRow";
 import LinkFormModal from "../components/LinkFormModal";
+import ConfirmDialog from "../components/ConfirmDialog";
 import { SkeletonRow } from "../components/Skeleton";
 import { Inbox, Plus, Search } from "../components/icons";
 
@@ -22,7 +23,9 @@ export default function DashboardPage() {
   const [page, setPage] = useState(1);
   const [showCreate, setShowCreate] = useState(false);
   const [editingLink, setEditingLink] = useState(null);
+  const [deletingLink, setDeletingLink] = useState(null);
   const [error, setError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
   const queryKey = ["links", { search, status, sort, page }];
   const { data, isLoading, isFetching } = useQuery({
@@ -50,8 +53,12 @@ export default function DashboardPage() {
   });
   const deleteMutation = useMutation({
     mutationFn: linksApi.deleteLink,
-    onSuccess: invalidate,
-    onError: (err) => setError(apiErrorMessage(err)),
+    onSuccess: () => {
+      invalidate();
+      setDeletingLink(null);
+      setDeleteError("");
+    },
+    onError: (err) => setDeleteError(apiErrorMessage(err)),
   });
   const toggleMutation = useMutation({
     mutationFn: linksApi.toggleLink,
@@ -60,9 +67,8 @@ export default function DashboardPage() {
   });
 
   const onDelete = (link) => {
-    if (!confirm(`Delete short link "${link.shortCode}"? This cannot be undone.`)) return;
-    setError("");
-    deleteMutation.mutate(link.id);
+    setDeleteError("");
+    setDeletingLink(link);
   };
 
   const total = data?.total ?? 0;
@@ -207,6 +213,18 @@ export default function DashboardPage() {
           link={editingLink}
           onClose={() => setEditingLink(null)}
           onSubmit={(payload) => updateMutation.mutateAsync({ id: editingLink.id, payload })}
+        />
+      )}
+      {deletingLink && (
+        <ConfirmDialog
+          title="Delete this link?"
+          body={`"${deletingLink.shortCode}" will be permanently deleted, along with its click history. This cannot be undone.`}
+          confirmLabel="Delete link"
+          danger
+          loading={deleteMutation.isPending}
+          error={deleteError}
+          onConfirm={() => deleteMutation.mutate(deletingLink.id)}
+          onClose={() => setDeletingLink(null)}
         />
       )}
     </div>
