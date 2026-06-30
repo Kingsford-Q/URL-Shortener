@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createLink } from "../api/links";
+import { fetchPublicQrBlob } from "../api/redirect";
 import { apiErrorMessage } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { isValidUrl, normalizeUrl } from "../lib/format";
@@ -34,6 +35,26 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [qrUrl, setQrUrl] = useState(null);
+
+  const shortCode = result?.link?.shortCode;
+
+  useEffect(() => {
+    if (!shortCode) {
+      setQrUrl(null);
+      return;
+    }
+    let objectUrl;
+    fetchPublicQrBlob(shortCode, "png")
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob);
+        setQrUrl(objectUrl);
+      })
+      .catch(() => setQrUrl(null));
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [shortCode]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -110,19 +131,40 @@ export default function HomePage() {
           </div>
 
           {result && (
-            <div className="mt-3 flex max-w-lg animate-fade-up items-center justify-between gap-3 rounded-xl border border-brand-200 bg-brand-50 p-3.5">
-              <a
-                href={result.shortUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="truncate font-mono text-sm font-medium text-brand-800 hover:underline"
-              >
-                {result.shortUrl}
-              </a>
-              <Button variant="secondary" size="sm" onClick={copy}>
-                <Copy size={13} />
-                {copied ? "Copied" : "Copy"}
-              </Button>
+            <div className="mt-3 flex max-w-lg animate-fade-up items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 p-3.5">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-brand-200 bg-white">
+                {qrUrl ? (
+                  <img src={qrUrl} alt={`QR code for ${result.shortUrl}`} className="h-12 w-12" />
+                ) : (
+                  <QrCode size={20} className="text-brand-300" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <a
+                  href={result.shortUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block truncate font-mono text-sm font-medium text-brand-800 hover:underline"
+                >
+                  {result.shortUrl}
+                </a>
+                <div className="mt-1.5 flex items-center gap-3">
+                  <Button variant="secondary" size="sm" onClick={copy}>
+                    <Copy size={13} />
+                    {copied ? "Copied" : "Copy"}
+                  </Button>
+                  {qrUrl && (
+                    <a
+                      href={qrUrl}
+                      download={`${shortCode}.png`}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-brand-700 hover:underline"
+                    >
+                      <QrCode size={12} />
+                      Download QR
+                    </a>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 

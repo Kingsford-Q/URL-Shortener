@@ -28,6 +28,15 @@
     @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-ink-50;
   }
 
+  /* Text fields draw their own focus border + glow (see Input/Select), so the
+     generic ring above would otherwise stack on top and read as a double
+     outline. */
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply ring-0 ring-offset-0;
+  }
+
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }

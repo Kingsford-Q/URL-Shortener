@@ -3,6 +3,7 @@ const { z } = require("zod");
 const asyncHandler = require("../utils/asyncHandler");
 const linkService = require("../services/linkService");
 const analyticsService = require("../services/analyticsService");
+const qrService = require("../services/qrService");
 const ApiError = require("../utils/ApiError");
 
 const STATUS_MESSAGES = {
@@ -16,6 +17,12 @@ const verifySchema = z.object({
   body: z.object({ password: z.string().min(1) }),
   params: z.object({ shortCode: z.string() }),
   query: z.object({}).optional(),
+});
+
+const qrSchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({ shortCode: z.string() }),
+  query: z.object({ format: z.enum(["png", "svg"]).optional() }),
 });
 
 // GET /:shortCode -- redirects directly for unprotected links, otherwise
@@ -52,4 +59,21 @@ const verify = asyncHandler(async (req, res) => {
   res.json({ originalUrl: link.originalUrl });
 });
 
-module.exports = { resolve, verify, verifySchema };
+// GET /api/redirect/:shortCode/qr -- public QR generation. No auth or ownership
+// check: a QR code only encodes the short URL itself, the same information
+// already visible in the link, so there's nothing extra to protect.
+const qr = asyncHandler(async (req, res) => {
+  const link = await linkService.findByShortCode(req.params.shortCode);
+  if (!link) throw new ApiError(404, "Short link not found");
+
+  const format = req.query.format === "svg" ? "svg" : "png";
+  if (format === "svg") {
+    const svg = await qrService.generateSvg(link.shortCode);
+    res.type("image/svg+xml").send(svg);
+  } else {
+    const png = await qrService.generatePng(link.shortCode);
+    res.type("image/png").send(png);
+  }
+});
+
+module.exports = { resolve, verify, qr, verifySchema, qrSchema };
