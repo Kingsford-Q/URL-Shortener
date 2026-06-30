@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // Switch to "postgresql" and set DATABASE_URL for production.
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  isAdmin      Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  links Link[]
+}
+
+model Link {
+  id            Int       @id @default(autoincrement())
+  userId        Int?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  originalUrl   String
+  shortCode     String    @unique
+  passwordHash  String?
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+  isPrivate     Boolean   @default(false)
+  oneTimeUse    Boolean   @default(false)
+  used          Boolean   @default(false)
+  clickCount    Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  visits Visit[]
+
+  @@index([userId])
+}
+
+model Visit {
+  id        Int      @id @default(autoincrement())
+  linkId    Int
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  browser   String?
+  os        String?
+  device    String?
+  referrer  String?
+  country   String?
+  visitedAt DateTime @default(now())
+
+  @@index([linkId])
+  @@index([visitedAt])
+}
