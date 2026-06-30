@@ -4,10 +4,13 @@ import * as linksApi from "../api/links";
 import { apiErrorMessage } from "../api/client";
 import Button from "../components/Button";
 import Input from "../components/Input";
+import Select from "../components/Select";
 import Alert from "../components/Alert";
 import Spinner from "../components/Spinner";
 import LinkRow from "../components/LinkRow";
 import LinkFormModal from "../components/LinkFormModal";
+import { SkeletonRow } from "../components/Skeleton";
+import { Inbox, Plus, Search } from "../components/icons";
 
 const PAGE_SIZE = 10;
 
@@ -64,22 +67,33 @@ export default function DashboardPage() {
 
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const isFiltering = Boolean(search) || status !== "all";
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-slate-900">Your links</h1>
-        <Button onClick={() => setShowCreate(true)}>+ New link</Button>
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-ink-950">Your links</h1>
+          <p className="mt-1 text-sm text-ink-500">
+            {total > 0 ? `${total} link${total === 1 ? "" : "s"} total` : "Manage every short link in one place"}
+          </p>
+        </div>
+        <Button onClick={() => setShowCreate(true)}>
+          <Plus size={15} />
+          New link
+        </Button>
       </div>
 
       <div className="mb-4">
         <Alert>{error}</Alert>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="w-64">
+      <div className="mb-4 flex flex-wrap items-center gap-2.5">
+        <div className="relative w-64">
+          <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
           <Input
-            placeholder="Search alias or URL..."
+            placeholder="Search alias or URL"
+            className="pl-9"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -87,8 +101,7 @@ export default function DashboardPage() {
             }}
           />
         </div>
-        <select
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        <Select
           value={status}
           onChange={(e) => {
             setStatus(e.target.value);
@@ -99,36 +112,34 @@ export default function DashboardPage() {
           <option value="active">Active</option>
           <option value="expired">Expired</option>
           <option value="disabled">Disabled</option>
-        </select>
-        <select
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-        >
+        </Select>
+        <Select value={sort} onChange={(e) => setSort(e.target.value)}>
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
           <option value="clicks">Most clicks</option>
-        </select>
-        {isFetching && !isLoading && <Spinner />}
+        </Select>
+        {isFetching && !isLoading && <Spinner className="h-4 w-4" />}
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
+        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonRow key={i} />
+          ))}
         </div>
       ) : data?.items?.length ? (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-ink-100 bg-white shadow-soft">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <th className="px-4 py-3">Link</th>
+              <tr className="border-b border-ink-100 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+                <th className="px-5 py-3">Link</th>
                 <th className="py-3">Clicks</th>
                 <th className="py-3">Created</th>
                 <th className="py-3">Expires</th>
                 <th className="py-3"></th>
               </tr>
             </thead>
-            <tbody className="px-4">
+            <tbody>
               {data.items.map((link) => (
                 <LinkRow
                   key={link.id}
@@ -146,20 +157,41 @@ export default function DashboardPage() {
           </table>
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white py-16 text-center text-slate-500">
-          No links yet. Create your first short link to get started.
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 bg-white py-20 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-ink-100 text-ink-400">
+            <Inbox size={20} />
+          </span>
+          <h3 className="mt-4 text-sm font-semibold text-ink-800">
+            {isFiltering ? "No links match your filters" : "No links yet"}
+          </h3>
+          <p className="mt-1 max-w-xs text-sm text-ink-500">
+            {isFiltering
+              ? "Try a different search term or clear the status filter."
+              : "Create your first short link to start tracking clicks."}
+          </p>
+          {!isFiltering && (
+            <Button className="mt-5" onClick={() => setShowCreate(true)}>
+              <Plus size={15} />
+              New link
+            </Button>
+          )}
         </div>
       )}
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-3">
-          <Button variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+        <div className="mt-5 flex items-center justify-center gap-3">
+          <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
             Previous
           </Button>
-          <span className="text-sm text-slate-500">
+          <span className="text-sm tabular-nums text-ink-500">
             Page {page} of {totalPages}
           </span>
-          <Button variant="secondary" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
             Next
           </Button>
         </div>

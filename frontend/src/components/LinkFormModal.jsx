@@ -3,6 +3,8 @@ import Modal from "./Modal";
 import Button from "./Button";
 import Input from "./Input";
 import Alert from "./Alert";
+import Toggle from "./Toggle";
+import { Lock, EyeOff, Zap, Hourglass } from "./icons";
 import { apiErrorMessage } from "../api/client";
 import { toIsoOrUndefined, toLocalInputValue } from "../lib/format";
 
@@ -81,48 +83,68 @@ export default function LinkFormModal({ link, onClose, onSubmit }) {
           />
         )}
 
-        <div className="space-y-2 rounded-lg border border-slate-200 p-3">
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-            <input type="checkbox" checked={hasPassword} onChange={(e) => setHasPassword(e.target.checked)} />
-            Password protect this link
-          </label>
-          {hasPassword && (
-            <Input
-              type="password"
-              placeholder={isEdit && link.hasPassword ? "Leave blank to keep current password" : "Set a password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={4}
+        <div className="divide-y divide-ink-100 rounded-xl border border-ink-100">
+          <div className="p-3.5">
+            <Toggle
+              checked={hasPassword}
+              onChange={setHasPassword}
+              icon={<Lock size={14} />}
+              label="Password protect"
+              description="Visitors must enter a password before continuing"
             />
-          )}
+            {hasPassword && (
+              <Input
+                type="password"
+                className="mt-3"
+                placeholder={isEdit && link.hasPassword ? "Leave blank to keep current password" : "Set a password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={4}
+              />
+            )}
+          </div>
+
+          <div className="p-3.5">
+            <Toggle
+              checked={hasExpiry}
+              onChange={setHasExpiry}
+              icon={<Hourglass size={14} />}
+              label="Expires at a set time"
+              description="Link stops working automatically after this date"
+            />
+            {hasExpiry && (
+              <Input
+                type="datetime-local"
+                className="mt-3"
+                value={expiresAt}
+                onChange={(e) => setExpiresAt(e.target.value)}
+                required
+              />
+            )}
+          </div>
+
+          <div className="p-3.5">
+            <Toggle
+              checked={oneTimeUse}
+              onChange={setOneTimeUse}
+              icon={<Zap size={14} />}
+              label="One-time use"
+              description="Link stops working after the first click"
+            />
+          </div>
+
+          <div className="p-3.5">
+            <Toggle
+              checked={isPrivate}
+              onChange={setIsPrivate}
+              icon={<EyeOff size={14} />}
+              label="Private"
+              description="Only visible to you in your dashboard"
+            />
+          </div>
         </div>
 
-        <div className="space-y-2 rounded-lg border border-slate-200 p-3">
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-            <input type="checkbox" checked={hasExpiry} onChange={(e) => setHasExpiry(e.target.checked)} />
-            Expires at a specific date/time
-          </label>
-          {hasExpiry && (
-            <Input
-              type="datetime-local"
-              value={expiresAt}
-              onChange={(e) => setExpiresAt(e.target.value)}
-              required
-            />
-          )}
-        </div>
-
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-          <input type="checkbox" checked={oneTimeUse} onChange={(e) => setOneTimeUse(e.target.checked)} />
-          One-time use (link stops working after first click)
-        </label>
-
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-          <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />
-          Private (visible only to you)
-        </label>
-
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="flex justify-end gap-2 pt-1">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>

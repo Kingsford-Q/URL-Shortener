@@ -1,14 +1,20 @@
+import { Check, X } from "./icons";
+
 const VARIANTS = {
-  error: "bg-red-50 text-red-700 border-red-200",
-  success: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  info: "bg-blue-50 text-blue-700 border-blue-200",
+  error: { wrap: "bg-red-50 text-red-700 border-red-100", icon: <X size={15} /> },
+  success: { wrap: "bg-brand-50 text-brand-800 border-brand-100", icon: <Check size={15} /> },
+  info: { wrap: "bg-ink-100 text-ink-700 border-ink-200", icon: null },
 };
 
 export default function Alert({ children, variant = "error", className = "" }) {
   if (!children) return null;
+  const v = VARIANTS[variant];
   return (
-    <div className={`rounded-lg border px-3 py-2 text-sm ${VARIANTS[variant]} ${className}`}>
-      {children}
+    <div
+      className={`flex animate-fade-up items-start gap-2 rounded-xl border px-3.5 py-2.5 text-sm ${v.wrap} ${className}`}
+    >
+      {v.icon && <span className="mt-0.5 shrink-0">{v.icon}</span>}
+      <span>{children}</span>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { apiErrorMessage } from "../api/client";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Alert from "../components/Alert";
+import { Link2 } from "../components/icons";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -31,9 +32,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="mx-auto max-w-sm">
-      <h1 className="mb-6 text-2xl font-bold text-slate-900">Log in</h1>
-      <form onSubmit={onSubmit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-6">
+    <div className="mx-auto max-w-sm animate-fade-up py-6">
+      <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-brand-900 text-brand-50">
+        <Link2 size={20} strokeWidth={2} />
+      </span>
+      <h1 className="mt-4 text-center font-display text-2xl font-semibold text-ink-950">Welcome back</h1>
+      <p className="mt-1 text-center text-sm text-ink-500">Log in to manage your links</p>
+
+      <form
+        onSubmit={onSubmit}
+        className="mt-7 space-y-4 rounded-2xl border border-ink-100 bg-white p-6 shadow-card"
+      >
         <Alert>{error}</Alert>
         <Input
           label="Email"
@@ -57,9 +66,9 @@ export default function LoginPage() {
           Log in
         </Button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-500">
+      <p className="mt-5 text-center text-sm text-ink-500">
         Don't have an account?{" "}
-        <Link to="/register" className="font-medium text-brand-600 hover:underline">
+        <Link to="/register" className="font-medium text-brand-700 hover:underline">
           Sign up
         </Link>
       </p>
